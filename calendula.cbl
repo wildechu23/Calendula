@@ -57,12 +57,6 @@
        main section.
            move width to width-d
            move height to height-d
-           call 'vec-add' using vec1 vec2
-           call 'vec-div' using vec1 vec2
-           display vec1-a(1) vec1-a(2) vec1-a(3) end-display
-           display norm(vec1) end-display
-           move unit-vector(vec1) to vec2
-           display vec2-a(1) vec2-a(2) vec2-a(3) end-display
       *>perform output-p3
            perform p6-header
            open extend p6-image
