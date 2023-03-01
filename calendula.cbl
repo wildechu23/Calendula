@@ -36,6 +36,7 @@
        01 height pic 9(4).
        01 width-d pic z(4).
        01 height-d pic z(4).
+       01 height-one pic 9(4).
        01 aspect-ratio comp-2.
 
        01 viewport-height comp-2 value 2.
@@ -53,7 +54,7 @@
 
 
        01 i pic 9(4).
-       01 j pic 9(4).
+       01 j pic s9(4).
        01 red pic 9(3).
        01 green pic 9(3).
        01 blue pic 9(3).
@@ -62,6 +63,16 @@
            05 vec-a comp-2 occurs 3 times.
        01 scale comp-2 value 255.
 
+       01 ray.
+           05 ray-origin.
+               10 ray-origin-a comp-2 occurs 3 times.
+           05 ray-dir.
+               10 ray-dir-a comp-2 occurs 3 times.
+       01 u comp-2.
+       01 v comp-2.
+       01 unit-vec.
+           05 unit-vec-a comp-2 occurs 3 times.
+       01 t comp-2.
 
        procedure division.
        main section.
@@ -81,15 +92,26 @@
            
            move width to width-d
            move height to height-d
+           compute height-one = height - 1
       *>perform output-p3
            perform p6-header
            open extend p6-image
-           perform varying i from 0 by 1 until i = height
-               display 'Scanline: 'i end-display
-               perform varying j from 0 by 1 until j = width
-                   compute vec-a(1) = i / (height - 1)
-                   compute vec-a(2) = j / (width - 1)
-                   compute vec-a(3) = 0.25
+           perform varying j from height-one by -1 until j < 0
+               display 'Scanline: 'j end-display
+               perform varying i from 0 by 1 until i = width
+                   compute u = i / (height - 1)
+                   compute v = j / (width - 1)
+                   move origin to ray-origin
+                   move lower-left to ray-dir
+                   compute ray-dir-a(1) = ray-dir-a(1) +
+                   viewport-width * u
+                   compute ray-dir-a(2) = ray-dir-a(2) +
+                   viewport-height * v
+                   move unit-vector(ray-dir) to unit-vec
+                   compute t = 0.5 * (unit-vec-a(2) + 1)
+                   compute vec-a(1) = (1 - t) * 1 + t * 0.5
+                   compute vec-a(2) = (1 - t) * 1 + t * 0.7
+                   compute vec-a(3) = (1 - t) * 1 + t * 1
                    perform write-p6
                end-perform
            end-perform
