@@ -32,10 +32,25 @@
            05 p6-image-a binary-char occurs 3 times.
 
        working-storage section.
-       01 width pic 9(4) value 256.
-       01 height pic 9(4) value 256.
+       01 width pic 9(4) value 400.
+       01 height pic 9(4).
        01 width-d pic z(4).
        01 height-d pic z(4).
+       01 aspect-ratio comp-2.
+
+       01 viewport-height comp-2 value 2.
+       01 viewport-width comp-2.
+       01 focal-length comp-2 value 1.
+
+       01 origin.
+           05 origin-a comp-2 value 0 occurs 3 times.
+       01 horizontal.
+           05 horizontal-a comp-2 value 0 occurs 3 times.
+       01 vertical.
+           05 vertical-a comp-2 value 0 occurs 3 times.
+       01 lower-left.
+           05 lower-left-a comp-2 occurs 3 times.
+
 
        01 i pic 9(4).
        01 j pic 9(4).
@@ -47,14 +62,23 @@
            05 vec-a comp-2 occurs 3 times.
        01 scale comp-2 value 255.
 
-       01 vec1.
-           05 vec1-a comp-2 value 2 occurs 3 times.
-       01 vec2.
-           05 vec2-a comp-2 value 3 occurs 3 times.
-       01 t comp-2 value 3.4.
 
        procedure division.
        main section.
+           compute aspect-ratio = 16/9
+           compute height = width / aspect-ratio
+           compute viewport-width = aspect-ratio * viewport-height
+           move viewport-width to horizontal-a(1)
+           move viewport-height to vertical-a(2)
+
+           move viewport-width to lower-left-a(1)
+           multiply -0.5 by lower-left-a(1)
+           move viewport-height to lower-left-a(2)
+           multiply -0.5 by lower-left-a(2)
+           multiply -1 by focal-length giving lower-left-a(3)
+           display lower-left-a(1)' 'lower-left-a(2)' 'lower-left-a(3)
+           end-display
+           
            move width to width-d
            move height to height-d
       *>perform output-p3
