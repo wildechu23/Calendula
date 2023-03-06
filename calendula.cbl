@@ -32,11 +32,11 @@
            05 p6-image-a binary-char occurs 3 times.
 
        working-storage section.
-       01 width pic 9(4) value 400.
-       01 height pic 9(4).
+       01 width comp-5 pic s9(4) value 400.
+       01 height comp-5 pic s9(4).
        01 width-d pic z(4).
        01 height-d pic z(4).
-       01 height-one pic 9(4).
+       01 height-one comp-5 pic s9(4).
        01 aspect-ratio comp-2.
 
        01 viewport-height comp-2 value 2.
@@ -53,11 +53,11 @@
            05 lower-left-a comp-2 occurs 3 times.
 
 
-       01 i pic 9(4).
-       01 j pic s9(4).
-       01 red pic 9(3).
-       01 green pic 9(3).
-       01 blue pic 9(3).
+       01 i comp-5 pic s9(4).
+       01 j comp-5 pic s9(4).
+       01 red comp-5 pic s9(3).
+       01 green comp-5 pic s9(3).
+       01 blue comp-5 pic s9(3).
 
        01 vec.
            05 vec-a comp-2 occurs 3 times.
@@ -70,6 +70,7 @@
                10 ray-dir-a comp-2 occurs 3 times.
        01 u comp-2.
        01 v comp-2.
+       01 ray-dir-norm comp-2.
        01 unit-vec.
            05 unit-vec-a comp-2 occurs 3 times.
        01 t comp-2.
@@ -87,27 +88,33 @@
            move viewport-height to lower-left-a(2)
            multiply -0.5 by lower-left-a(2)
            multiply -1 by focal-length giving lower-left-a(3)
-           display lower-left-a(1)' 'lower-left-a(2)' 'lower-left-a(3)
-           end-display
            
            move width to width-d
            move height to height-d
            compute height-one = height - 1
-      *>perform output-p3
            perform p6-header
            open extend p6-image
            perform varying j from height-one by -1 until j < 0
                display 'Scanline: 'j end-display
                perform varying i from 0 by 1 until i = width
-                   compute u = i / (height - 1)
-                   compute v = j / (width - 1)
+                   compute u = i / (width - 1)
+                   compute v = j / (height - 1)
                    move origin to ray-origin
                    move lower-left to ray-dir
                    compute ray-dir-a(1) = ray-dir-a(1) +
                    viewport-width * u
                    compute ray-dir-a(2) = ray-dir-a(2) +
                    viewport-height * v
-                   move unit-vector(ray-dir) to unit-vec
+      *>ray-color
+                   compute ray-dir-norm = function sqrt(
+                       ray-dir-a(1) * ray-dir-a(1) +
+                       ray-dir-a(2) * ray-dir-a(2) +
+                       ray-dir-a(3) * ray-dir-a(3))
+                   move ray-dir to unit-vec
+                   divide ray-dir-norm into unit-vec-a(1)
+                   divide ray-dir-norm into unit-vec-a(2)
+                   divide ray-dir-norm into unit-vec-a(3)
+      *>move unit-vector(ray-dir) to unit-vec
                    compute t = 0.5 * (unit-vec-a(2) + 1)
                    compute vec-a(1) = (1 - t) * 1 + t * 0.5
                    compute vec-a(2) = (1 - t) * 1 + t * 0.7
@@ -130,10 +137,9 @@
            close header.
 
        write-p6 section.
-           call 'scale' using vec scale
-           move vec-a(1) to p6-image-a(1)
-           move vec-a(2) to p6-image-a(2)
-           move vec-a(3) to p6-image-a(3)
+           multiply scale by vec-a(1) giving p6-image-a(1)
+           multiply scale by vec-a(2) giving p6-image-a(2)
+           multiply scale by vec-a(3) giving p6-image-a(3)
            write p6-image-file end-write.
 
        output-p3 section.
